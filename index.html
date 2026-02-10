@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LocalRestaurantOwner – Profitability Master Calculator</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --line:rgba(255,255,255,.08);
+      --text:#e6edf6;
+      --muted:rgba(230,237,246,.72);
+      --muted2:rgba(230,237,246,.55);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:12px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(96,165,250,.18), transparent 55%),
+                  radial-gradient(1000px 700px at 85% 25%, rgba(167,139,250,.14), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:1180px;margin:24px auto 70px;padding:0 16px}
+    .topbar{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    .brand{
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px 18px;
+      box-shadow:var(--shadow);
+      min-width:320px;
+    }
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .brand p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    button{
+      border:0;cursor:pointer;
+      padding:11px 14px;border-radius:12px;
+      color:#fff;font-weight:900;
+      background:linear-gradient(180deg, rgba(29,78,216,1), rgba(29,78,216,.82));
+      box-shadow:0 10px 18px rgba(29,78,216,.18);
+    }
+    button.secondary{
+      background:linear-gradient(180deg, rgba(51,65,85,1), rgba(51,65,85,.78));
+      box-shadow:0 10px 18px rgba(51,65,85,.18);
+    }
+    button:active{transform:translateY(1px)}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+    @media (max-width: 980px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .card h2{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:1000;letter-spacing:.25px;text-transform:uppercase}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .field{
+      flex:1;min-width:170px;
+      background:rgba(15,23,42,.75);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+    }
+    .field label{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:900}
+    .field input{
+      width:100%;
+      background:transparent;border:0;outline:none;
+      color:var(--text);
+      font-size:16px;font-weight:950;
+    }
+    .field small{display:block;margin-top:6px;color:var(--muted2);font-size:11px;line-height:1.25}
+    .pill{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:8px 10px;border-radius:999px;
+      background:rgba(96,165,250,.12);
+      border:1px solid rgba(96,165,250,.22);
+      color:#cfe6ff;font-weight:950;font-size:12px;
+      white-space:nowrap;
+    }
+    .pill b{color:#fff}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width: 980px){.split{grid-template-columns:1fr}}
+    .sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .sectionTitle h3{margin:0;font-size:14px}
+    .sectionTitle .sub{color:var(--muted);font-size:12px}
+    .module{
+      border:1px solid var(--line);
+      border-radius:var(--radius2);
+      background:rgba(15,23,42,.55);
+      padding:12px;margin-bottom:10px;
+    }
+    .moduleHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .moduleHead .name{font-weight:1000}
+    .moduleHead .desc{font-size:12px;color:var(--muted);line-height:1.25;margin-top:2px}
+    .toggle{display:flex;align-items:center;gap:10px;user-select:none}
+    .switch{
+      width:44px;height:26px;border-radius:999px;
+      background:rgba(148,163,184,.35);
+      border:1px solid rgba(148,163,184,.35);
+      position:relative;flex:0 0 auto;transition:.18s ease;
+    }
+    .knob{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2.5px;left:3px;transition:.18s ease}
+    .toggle input{display:none}
+    .toggle input:checked + .switch{background:rgba(34,197,94,.25);border-color:rgba(34,197,94,.35)}
+    .toggle input:checked + .switch .knob{left:20px;background:#eafff1}
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .kpi{border:1px solid var(--line);background:rgba(17,27,46,.75);border-radius:14px;padding:12px}
+    .kpi .label{font-size:12px;color:var(--muted);font-weight:950}
+    .kpi .value{font-size:20px;font-weight:1000;margin-top:6px}
+    .kpi .sub{font-size:11px;color:var(--muted2);margin-top:4px;line-height:1.2}
+    .divider{height:1px;background:var(--line);margin:14px 0}
+    .footerTotals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .totalCard{
+      border:1px solid rgba(96,165,250,.28);
+      background:linear-gradient(180deg, rgba(96,165,250,.16), rgba(15,23,42,.55));
+      border-radius:16px;padding:14px;
+    }
+    .totalCard .big{font-size:28px;font-weight:1000;margin:8px 0 2px}
+    .totalCard .small{color:var(--muted);font-size:12px}
+    .mini{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      background:rgba(96,165,250,.10);
+      border:1px solid rgba(96,165,250,.20);
+      color:#d7ecff;
+      padding:8px 10px;border-radius:999px;
+      font-size:12px;font-weight:950;
+      white-space:nowrap;
+    }
+    .calcBar{
+      margin-top:12px;
+      display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      border:1px solid rgba(96,165,250,.22);
+      background:rgba(96,165,250,.10);
+      border-radius:16px;padding:12px;
+    }
+    .statusPill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      background:rgba(15,23,42,.7);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;font-weight:950;
+      white-space:nowrap;
+    }
+    .statusPill b{color:#fff}
+    .note{font-size:12px;color:var(--muted);line-height:1.35;margin-top:10px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>LocalRestaurantOwner • Profitability Master Calculator</h1>
+        <p>Enter baseline → toggle what applies → <b>Run Numbers</b> → Print Summary.</p>
+      </div>
+      <div class="actions">
+        <button class="secondary" id="btnReset">Reset</button>
+        <button id="btnPrintTop">Print Summary</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Baseline Snapshot</h2>
+
+        <div class="row">
+          <div class="field">
+            <label><span>Restaurant Name</span><span>Optional</span></label>
+            <input id="restaurantName" type="text" placeholder="e.g., Ronin Teriyaki" />
+            <small>Used on printed report.</small>
+          </div>
+          <div class="field">
+            <label><span>Prepared Date</span><span>Auto</span></label>
+            <input id="preparedDate" type="text" />
+            <small>Auto-filled today (editable).</small>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="field">
+            <label><span>Monthly Card Sales</span><span>$</span></label>
+            <input id="monthlySales" type="text" inputmode="decimal" placeholder="40000" />
+            <small>Enter monthly card volume.</small>
+          </div>
+          <div class="field">
+            <label><span>Monthly Processing Fees</span><span>$</span></label>
+            <input id="monthlyFees" type="text" inputmode="decimal" placeholder="1200" />
+            <small>If known, we calculate Effective Rate.</small>
+          </div>
+          <div class="field">
+            <label><span>Effective Rate (EFR)</span><span>Auto</span></label>
+            <input id="effectiveRate" type="text" readonly />
+            <small>Fees ÷ Sales.</small>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div class="field">
+            <label><span>Average Ticket</span><span>$</span></label>
+            <input id="avgTicket" type="text" inputmode="decimal" placeholder="15" />
+            <small>Edit ticket OR transactions.</small>
+          </div>
+          <div class="field">
+            <label><span>Total Transactions (Monthly)</span><span>#</span></label>
+            <input id="txCount" type="text" inputmode="numeric" placeholder="2667" />
+            <small>Edit transactions OR ticket.</small>
+          </div>
+          <div class="field">
+            <label><span>Ticket↔Tx Mode</span><span>Auto</span></label>
+            <div class="mini">
+              <span class="pill">Mode: <b id="calcMode">Smart</b></span>
+              <span class="pill">Data: <b id="dataQuality">Good</b></span>
+            </div>
+            <small>Use Run Numbers to lock totals.</small>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="split">
+          <div>
+            <div class="sectionTitle">
+              <div><h3>Increase Sales</h3><div class="sub">Toggle what applies (OFF = excluded).</div></div>
+              <span class="pill">Subtotal: <b id="incSalesTotal">$0</b></span>
+            </div>
+
+            <div class="module">
+              <div class="moduleHead">
+                <div>
+                  <div class="name">Email Marketing (Campaign Revenue)</div>
+                  <div class="desc">List × redemption × avg ticket × campaigns/month</div>
+                </div>
+                <label class="toggle">
+                  <input id="t_email" type="checkbox" checked />
+                  <span class="switch"><span class="knob"></span></span>
+                  <span id="lbl_email">On</span>
+                </label>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label><span>Email List Size</span><span>#</span></label>
+                  <input id="emailList" type="text" inputmode="numeric" placeholder="1000" />
+                </div>
+                <div class="field">
+                  <label><span>Redemption Rate</span><span>%</span></label>
+                  <input id="emailRedemption" type="text" inputmode="decimal" placeholder="2" />
+                </div>
+                <div class="field">
+                  <label><span>Campaigns / Month</span><span>#</span></label>
+                  <input id="emailCampaigns" type="text" inputmode="numeric" placeholder="2" />
+                </div>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><div class="label">Estimated Added Revenue</div><div class="value" id="emailOut">$0</div><div class="sub">Monthly impact.</div></div>
+                <div class="kpi"><div class="label">Estimated Orders / Month</div><div class="value" id="emailOrders">0</div><div class="sub">List × redemption × campaigns.</div></div>
+              </div>
+            </div>
+
+            <div class="module">
+              <div class="moduleHead">
+                <div>
+                  <div class="name">Retention & Loyalty</div>
+                  <div class="desc">Customers × lift × extra visits × avg ticket</div>
+                </div>
+                <label class="toggle">
+                  <input id="t_retention" type="checkbox" />
+                  <span class="switch"><span class="knob"></span></span>
+                  <span id="lbl_ret">Off</span>
+                </label>
+              </div>
+              <div class="row">
+                <div class="field"><label><span>Monthly Customers</span><span>#</span></label><input id="retCustomers" type="text" inputmode="numeric" placeholder="1000" /></div>
+                <div class="field"><label><span>Retention Lift</span><span>%</span></label><input id="retLift" type="text" inputmode="decimal" placeholder="2" /></div>
+                <div class="field"><label><span>Extra Visits / Retained</span><span>#</span></label><input id="retExtraVisits" type="text" inputmode="decimal" placeholder="1" /></div>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><div class="label">Estimated Added Revenue</div><div class="value" id="retOut">$0</div><div class="sub">Monthly impact.</div></div>
+                <div class="kpi"><div class="label">Retained Customers / Month</div><div class="value" id="retCount">0</div><div class="sub">Customers × lift.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="sectionTitle">
+              <div><h3>Decrease Costs</h3><div class="sub">Toggle what applies (OFF = excluded).</div></div>
+              <span class="pill">Subtotal: <b id="decCostsTotal">$0</b></span>
+            </div>
+
+            <div class="module">
+              <div class="moduleHead">
+                <div>
+                  <div class="name">Processing Optimization (Scenario)</div>
+                  <div class="desc">Current fees vs projected fees at target effective rate</div>
+                </div>
+                <label class="toggle">
+                  <input id="t_procopt" type="checkbox" checked />
+                  <span class="switch"><span class="knob"></span></span>
+                  <span id="lbl_proc">On</span>
+                </label>
+              </div>
+              <div class="row">
+                <div class="field"><label><span>Target Effective Rate</span><span>%</span></label><input id="targetEfr" type="text" inputmode="decimal" placeholder="3.0" /></div>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><div class="label">Estimated Monthly Savings</div><div class="value" id="procOut">$0</div><div class="sub">Requires fees visibility.</div></div>
+                <div class="kpi"><div class="label">Projected Fees @ Target</div><div class="value" id="projFees">$0</div><div class="sub">Sales × target.</div></div>
+              </div>
+            </div>
+
+            <div class="module">
+              <div class="moduleHead">
+                <div>
+                  <div class="name">3rd-Party Commission Leakage</div>
+                  <div class="desc">Daily orders × avg order × commission % × days/month</div>
+                </div>
+                <label class="toggle">
+                  <input id="t_3p" type="checkbox" />
+                  <span class="switch"><span class="knob"></span></span>
+                  <span id="lbl_3p">Off</span>
+                </label>
+              </div>
+              <div class="row">
+                <div class="field"><label><span>Orders / Day</span><span>#</span></label><input id="tpOrders" type="text" inputmode="numeric" placeholder="20" /></div>
+                <div class="field"><label><span>Avg Order</span><span>$</span></label><input id="tpAov" type="text" inputmode="decimal" placeholder="25" /></div>
+                <div class="field"><label><span>Commission</span><span>%</span></label><input id="tpComm" type="text" inputmode="decimal" placeholder="15" /></div>
+                <div class="field"><label><span>Days / Month</span><span>#</span></label><input id="tpDays" type="text" inputmode="numeric" placeholder="28" /></div>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><div class="label">Estimated Monthly Leakage</div><div class="value" id="tpOut">$0</div></div>
+                <div class="kpi"><div class="label">Daily Leakage</div><div class="value" id="tpDaily">$0</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="footerTotals">
+          <div class="totalCard">
+            <div class="small">Estimated Net Monthly Profit Lift</div>
+            <div class="big" id="netMonthly">$0</div>
+            <div class="small">Increase Sales + Decrease Costs (toggled ON only)</div>
+            <div class="mini">
+              <span class="chip">Annualized: <span id="netAnnual">$0</span></span>
+              <span class="chip">Increase Sales: <span id="incSalesChip">$0</span></span>
+              <span class="chip">Decrease Costs: <span id="decCostsChip">$0</span></span>
+            </div>
+          </div>
+
+          <div class="totalCard">
+            <div class="small">Owner-Friendly Framing</div>
+            <div class="big" id="perDay">$0</div>
+            <div class="small">Net impact per day (monthly ÷ 30)</div>
+            <div class="note">Close with: “That’s <b>$X/day</b> of profit impact.”</div>
+          </div>
+        </div>
+
+        <div class="calcBar">
+          <div>
+            <div style="font-weight:1000">Finish inputs → Run Numbers</div>
+            <div class="note" style="margin:4px 0 0">This locks totals before printing.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span class="statusPill">Last calculated: <b id="lastCalc">—</b></span>
+            <button id="btnCalc">Run Numbers</button>
+            <button class="secondary" id="btnPrint">Print Summary</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Use</h2>
+        <div class="note">
+          1) Enter sales + fees → confirm EFR.<br/>
+          2) Toggle only what applies.<br/>
+          3) Scroll down → <b>Run Numbers</b> → <b>Print Summary</b>.
+        </div>
+        <div class="divider"></div>
+        <div class="note">
+          If Print Summary does nothing, it’s almost always pop-up blocking. Allow pop-ups for this page.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    function $(id){ return document.getElementById(id); }
+
+    function toNum(v){
+      var s = String(v==null ? '' : v).replace(/[$,%\s,]/g,'').trim();
+      if(!s) return 0;
+      var n = Number(s);
+      return isFinite(n) ? n : 0;
+    }
+
+    function money(n){
+      var x = Number(n||0);
+      var sign = x < 0 ? '-' : '';
+      var abs = Math.abs(x);
+      return sign + abs.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+    }
+
+    function money2(n){
+      var x = Number(n||0);
+      var sign = x < 0 ? '-' : '';
+      var abs = Math.abs(x);
+      return sign + abs.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:2});
+    }
+
+    function pct(n){ return (Number(n||0)).toFixed(2) + '%'; }
+
+    function escapeHtml(str){
+      return String(str||'')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    function setToday(){
+      var d = new Date();
+      var mm = String(d.getMonth()+1).padStart(2,'0');
+      var dd = String(d.getDate()).padStart(2,'0');
+      var yyyy = d.getFullYear();
+      $('preparedDate').value = mm + '/' + dd + '/' + yyyy;
+    }
+
+    var lastEdited = 'ticket';
+
+    function setToggleLabels(){
+      $('lbl_email').textContent = $('t_email').checked ? 'On' : 'Off';
+      $('lbl_ret').textContent   = $('t_retention').checked ? 'On' : 'Off';
+      $('lbl_proc').textContent  = $('t_procopt').checked ? 'On' : 'Off';
+      $('lbl_3p').textContent    = $('t_3p').checked ? 'On' : 'Off';
+    }
+
+    function calcEmail(ticket){
+      if(!$('t_email').checked) return {value:0, orders:0};
+      var list = toNum($('emailList').value);
+      var red  = toNum($('emailRedemption').value)/100;
+      var camps= toNum($('emailCampaigns').value);
+      var orders = Math.round(list * red * camps);
+      return {orders:orders, value: orders * ticket};
+    }
+
+    function calcRetention(ticket){
+      if(!$('t_retention').checked) return {value:0, retained:0};
+      var cust = toNum($('retCustomers').value);
+      var lift = toNum($('retLift').value)/100;
+      var extra= toNum($('retExtraVisits').value);
+      var retained = Math.round(cust * lift);
+      return {retained:retained, value: retained * extra * ticket};
+    }
+
+    function calcProcOpt(sales, fees){
+      if(!$('t_procopt').checked) return {value:0, proj:0};
+      var target = toNum($('targetEfr').value)/100;
+      if(sales<=0 || target<=0) return {value:0, proj:0};
+      var projected = sales * target;
+      var savings = (fees>0) ? (fees - projected) : 0;
+      return {proj:projected, value:savings};
+    }
+
+    function calcThirdParty(){
+      if(!$('t_3p').checked) return {value:0, daily:0};
+      var orders = toNum($('tpOrders').value);
+      var aov    = toNum($('tpAov').value);
+      var comm   = toNum($('tpComm').value)/100;
+      var days   = toNum($('tpDays').value) || 28;
+      var daily  = orders * aov * comm;
+      return {daily:daily, value: daily * days};
+    }
+
+    function stampCalculated(){
+      var d = new Date();
+      var hh = String(d.getHours()).padStart(2,'0');
+      var mm = String(d.getMinutes()).padStart(2,'0');
+      var ss = String(d.getSeconds()).padStart(2,'0');
+      $('lastCalc').textContent = hh + ':' + mm + ':' + ss;
+    }
+
+    function recalc(){
+      setToggleLabels();
+
+      var sales = toNum($('monthlySales').value);
+      var fees  = toNum($('monthlyFees').value);
+      var ticket= toNum($('avgTicket').value);
+      var tx    = toNum($('txCount').value);
+
+      if(sales>0){
+        if(lastEdited==='ticket' && ticket>0){
+          tx = Math.round(sales / ticket);
+          $('txCount').value = String(tx);
+          $('calcMode').textContent = 'Ticket → Transactions';
+        } else if(lastEdited==='tx' && tx>0){
+          ticket = sales / tx;
+          $('avgTicket').value = String(Math.round(ticket*100)/100);
+          $('calcMode').textContent = 'Transactions → Ticket';
+        } else {
+          $('calcMode').textContent = 'Smart';
+        }
+      } else {
+        $('calcMode').textContent = 'Smart';
+      }
+
+      $('effectiveRate').value = (sales>0 && fees>0) ? pct((fees/sales)*100) : '—';
+      $('dataQuality').textContent = (sales>0 && (ticket>0 || tx>0)) ? 'Good' : (sales>0 ? 'Okay' : 'Needs Inputs');
+
+      var email = calcEmail(ticket||0);
+      $('emailOrders').textContent = email.orders.toLocaleString();
+      $('emailOut').textContent = money(email.value);
+
+      var ret = calcRetention(ticket||0);
+      $('retCount').textContent = ret.retained.toLocaleString();
+      $('retOut').textContent = money(ret.value);
+
+      var proc = calcProcOpt(sales, fees);
+      $('projFees').textContent = money2(proc.proj);
+      $('procOut').textContent = money(proc.value);
+
+      var tp = calcThirdParty();
+      $('tpDaily').textContent = money2(tp.daily);
+      $('tpOut').textContent = money(tp.value);
+
+      var inc = email.value + ret.value;
+      var dec = proc.value + tp.value;
+
+      $('incSalesTotal').textContent = money(inc);
+      $('decCostsTotal').textContent = money(dec);
+
+      $('incSalesChip').textContent = money(inc);
+      $('decCostsChip').textContent = money(dec);
+
+      var net = inc + dec;
+      $('netMonthly').textContent = money(net);
+      $('netAnnual').textContent = money(net*12);
+      $('perDay').textContent = money2(net/30);
+    }
+
+    function buildPrintHTML(){
+      var name = ($('restaurantName').value || '____________________').trim();
+      var date = ($('preparedDate').value || '').trim();
+
+      var sales = toNum($('monthlySales').value);
+      var fees  = toNum($('monthlyFees').value);
+      var ticket= toNum($('avgTicket').value);
+      var tx    = toNum($('txCount').value);
+      var efr   = (sales>0 && fees>0) ? ((fees/sales)*100) : null;
+
+      var email = calcEmail(ticket);
+      var ret   = calcRetention(ticket);
+      var proc  = calcProcOpt(sales, fees);
+      var tp    = calcThirdParty();
+
+      var incSubtotal = email.value + ret.value;
+      var decSubtotal = proc.value + tp.value;
+      var netMonthly  = incSubtotal + decSubtotal;
+      var netAnnual   = netMonthly*12;
+
+      function row(label, val){
+        return '<tr><td><b>' + escapeHtml(label) + '</b></td><td class="right">' + escapeHtml(money(val)) + '</td></tr>';
+      }
+
+      var incRows = '';
+      if($('t_email').checked) incRows += row('Email Marketing Impact', email.value);
+      if($('t_retention').checked) incRows += row('Retention & Loyalty Impact', ret.value);
+      if(!incRows) incRows = '<tr><td class="muted">No modules selected</td><td class="right">$0</td></tr>';
+      incRows += '<tr><td><b>Subtotal – Increased Sales</b></td><td class="right"><b>' + escapeHtml(money(incSubtotal)) + '</b></td></tr>';
+
+      var decRows = '';
+      if($('t_procopt').checked) decRows += row('Processing Optimization', proc.value);
+      if($('t_3p').checked) decRows += row('3rd-Party Commission Reduction', tp.value);
+      if(!decRows) decRows = '<tr><td class="muted">No modules selected</td><td class="right">$0</td></tr>';
+      decRows += '<tr><td><b>Subtotal – Cost Reduction</b></td><td class="right"><b>' + escapeHtml(money(decSubtotal)) + '</b></td></tr>';
+
+      // ===== SIMPLE "WHY" NOTES (below Prepared by) =====
+      var camps = toNum($('emailCampaigns').value) || 0;
+      var redPct = toNum($('emailRedemption').value) || 0;
+      var extraVisits = toNum($('retExtraVisits').value) || 0;
+      var targetEfr = toNum($('targetEfr').value) || 0;
+
+      var incNotes = '';
+      if($('t_email').checked){
+        incNotes += '<li>Email Marketing: Results based on running <b>' + escapeHtml(String(camps||2)) + ' campaigns/month</b> with an average <b>' + escapeHtml(String(redPct||2)) + '%</b> visit rate</li>';
+      }
+      if($('t_retention').checked){
+        incNotes += '<li>Retention &amp; Loyalty: Assumes <b>' + escapeHtml(String(extraVisits||1)) + '</b> additional visit(s) from retained customers</li>';
+      }
+      if(!incNotes) incNotes = '<li class="muted">No increase-sales modules selected</li>';
+
+      var decNotes = '';
+      if($('t_procopt').checked){
+        decNotes += '<li>Processing Optimization: Based on improving the effective rate to <b>' + escapeHtml(String(targetEfr||3.0)) + '%</b></li>';
+      }
+      if($('t_3p').checked){
+        decNotes += '<li>3rd-Party Commission Reduction: Savings from shifting a portion of orders to <b>1st-party ordering</b></li>';
+      }
+      if(!decNotes) decNotes = '<li class="muted">No cost-reduction modules selected</li>';
+
+      var whyHTML = '';
+      whyHTML += '<div class="why">';
+      whyHTML +=   '<div class="whyTitle">Impact Attribution Summary</div>';
+      whyHTML +=   '<div class="whySub">(Simple “why” behind the totals above — only modules toggled ON are included)</div>';
+      whyHTML +=   '<div class="whyGrid">';
+      whyHTML +=     '<div class="whyCol"><div class="whyHead">Increase Sales</div><ul>' + incNotes + '</ul></div>';
+      whyHTML +=     '<div class="whyCol"><div class="whyHead">Decrease Costs</div><ul>' + decNotes + '</ul></div>';
+      whyHTML +=   '</div>';
+      whyHTML += '</div>';
+      // ==================================================
+
+      var html = '';
+      html += '<!doctype html><html><head><meta charset="utf-8" />';
+      html += '<title>Profitability Summary</title>';
+      html += '<style>';
+      html += '@page{margin:.6in}';
+      html += 'body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#0b1220}';
+      html += '.hdr{display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid #0b1220;padding-bottom:10px;margin-bottom:14px}';
+      html += '.brand{font-weight:900;font-size:16px}';
+      html += '.sub{font-size:12px;color:#334155;margin-top:4px;line-height:1.25}';
+      html += '.meta{text-align:right;font-size:12px}';
+      html += 'h2{font-size:13px;margin:14px 0 8px;text-transform:uppercase;letter-spacing:.18px}';
+      html += '.box{border:1px solid #cbd5e1;border-radius:12px;padding:12px;background:#f8fafc}';
+      html += '.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}';
+      html += '.krow{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px dashed #cbd5e1}';
+      html += '.krow:last-child{border-bottom:0}';
+      html += '.klabel{font-weight:800}';
+      html += '.kval{font-weight:900}';
+      html += 'table{width:100%;border-collapse:collapse}';
+      html += 'th,td{font-size:12px;padding:10px;border-bottom:1px solid #e2e8f0;vertical-align:top}';
+      html += 'th{background:#f1f5f9;font-weight:900;text-align:left}';
+      html += '.right{text-align:right;font-weight:900}';
+      html += '.muted{color:#64748b}';
+      html += '.totals{margin-top:14px;border:2px solid #0b1220;border-radius:14px;padding:12px}';
+      html += '.big{display:flex;justify-content:space-between;font-weight:1000;font-size:18px;margin:8px 0}';
+      html += '.assump{margin-top:12px;font-size:11px;color:#334155;line-height:1.35}';
+      html += '.footer{margin-top:16px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#334155}';
+
+      // Simple "why" section styling (small + light grey)
+      html += '.why{margin-top:10px;padding-top:8px}';
+      html += '.whyTitle{font-size:11px;font-weight:900;color:#475569}';
+      html += '.whySub{font-size:10px;color:#94a3b8;margin-top:2px;line-height:1.25}';
+      html += '.whyGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}';
+      html += '.whyHead{font-size:10.5px;font-weight:900;color:#475569;margin-bottom:4px}';
+      html += '.why ul{margin:0;padding-left:16px}';
+      html += '.why li{font-size:10.5px;color:#64748b;line-height:1.35;margin:3px 0}';
+      html += '.why li b{color:#475569}';
+
+      html += '</style></head><body>';
+
+      html += '<div class="hdr">';
+      html +=   '<div><div class="brand">LocalRestaurantOwner</div><div class="sub"><b>Profitability Impact Summary</b><br/>Consulting-style estimate based on selected modules.</div></div>';
+      html +=   '<div class="meta"><div><b>Prepared for:</b> ' + escapeHtml(name) + '</div><div><b>Date:</b> ' + escapeHtml(date) + '</div></div>';
+      html += '</div>';
+
+      html += '<h2>Baseline Snapshot</h2>';
+      html += '<div class="box"><div class="grid">';
+      html +=   '<div>';
+      html +=     '<div class="krow"><span class="klabel">Monthly Card Sales</span><span class="kval">' + escapeHtml(money2(sales)) + '</span></div>';
+      html +=     '<div class="krow"><span class="klabel">Avg Ticket</span><span class="kval">' + escapeHtml(money2(ticket)) + '</span></div>';
+      html +=     '<div class="krow"><span class="klabel">Total Transactions</span><span class="kval">' + escapeHtml((tx||0).toLocaleString()) + '</span></div>';
+      html +=   '</div>';
+      html +=   '<div>';
+      html +=     '<div class="krow"><span class="klabel">Monthly Processing Fees</span><span class="kval">' + escapeHtml(money2(fees)) + '</span></div>';
+      html +=     '<div class="krow"><span class="klabel">Effective Processing Rate</span><span class="kval">' + (efr===null ? '—' : escapeHtml(efr.toFixed(2)+'%')) + '</span></div>';
+      html +=     '<div class="krow"><span class="klabel">Data Note</span><span class="kval muted">Modules toggled OFF are excluded</span></div>';
+      html +=   '</div>';
+      html += '</div></div>';
+
+      html += '<h2>Increase Sales</h2>';
+      html += '<table><thead><tr><th>Category</th><th class="right">Monthly Impact</th></tr></thead><tbody>' + incRows + '</tbody></table>';
+
+      html += '<h2>Decrease Costs</h2>';
+      html += '<table><thead><tr><th>Category</th><th class="right">Monthly Impact</th></tr></thead><tbody>' + decRows + '</tbody></table>';
+
+      html += '<div class="totals">';
+      html +=   '<div class="big"><span>Estimated Net Monthly Profit Lift</span><span>' + escapeHtml(money(netMonthly)) + '</span></div>';
+      html +=   '<div class="big" style="font-size:16px"><span>Estimated Annual Impact</span><span>' + escapeHtml(money(netAnnual)) + '</span></div>';
+      html +=   '<div class="assump"><b>Assumptions:</b> Conservative estimates used. Results vary by execution. If statement data is unknown, validate and re-run. Processing savings require fee visibility.</div>';
+      html += '</div>';
+
+      // Prepared by (kept as-is)
+      html += '<div class="footer"><div><b>Prepared by:</b> LocalRestaurantOwner Consulting</div><div><b>Louis Ramirez</b> • 714-553-5819</div></div>';
+
+      // Simple "why" notes (below Prepared by)
+      html += whyHTML;
+
+      html += '<script>window.onload=function(){window.print();};<\/script>';
+      html += '</body></html>';
+
+      return html;
+    }
+
+    function printSummary(){
+      // Always force calc first
+      recalc();
+      stampCalculated();
+
+      var w = window.open('', '_blank');
+      if(!w){
+        alert('Pop-up blocked. Allow pop-ups for this page to print the report.');
+        return;
+      }
+      w.document.open();
+      w.document.write(buildPrintHTML());
+      w.document.close();
+    }
+
+    function bind(){
+      setToday();
+
+      // defaults for quick testing
+      $('monthlySales').value = '40000';
+      $('monthlyFees').value  = '1200';
+      $('emailList').value    = '1000';
+
+      $('avgTicket').addEventListener('input', function(){ lastEdited='ticket'; recalc(); });
+      $('txCount').addEventListener('input', function(){ lastEdited='tx'; recalc(); });
+
+      // live recalc
+      Array.prototype.forEach.call(document.querySelectorAll('input'), function(inp){
+        if(inp.type==='checkbox') return;
+        inp.addEventListener('input', recalc);
+        inp.addEventListener('change', recalc);
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('input[type="checkbox"]'), function(cb){
+        cb.addEventListener('change', recalc);
+      });
+
+      $('btnCalc').addEventListener('click', function(){ recalc(); stampCalculated(); });
+      $('btnPrint').addEventListener('click', printSummary);
+      $('btnPrintTop').addEventListener('click', printSummary);
+      $('btnReset').addEventListener('click', function(){ window.location.reload(); });
+
+      recalc();
+      stampCalculated();
+    }
+
+    bind();
+  </script>
+</body>
+</html>
